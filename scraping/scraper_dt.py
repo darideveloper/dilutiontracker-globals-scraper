@@ -16,7 +16,8 @@ class ScrapingDilutionTracker (WebScraping):
         self.pages = {
             "home": "https://dilutiontracker.com",
             "new_filings": "https://dilutiontracker.com/app/new?a=t3vcol",
-            "completed_offering": "https://dilutiontracker.com/app/completed-offerings"
+            "completed_offering": "https://dilutiontracker.com/app/completed-offerings",
+            "pending_s1s": "https://dilutiontracker.com/app/s1"
         }
 
         # Start chrome instance with chrome data
@@ -25,13 +26,13 @@ class ScrapingDilutionTracker (WebScraping):
             start_killing=True,
         )
 
-    def __get_table_data__(self, selector_rows: str, columns: dict,
+    def __get_table_data__(self, columns: list,
                            start_row: int = 1, end_row: int = -1) -> list:
         """ get data from table structure
 
         Args:
             selector_rows (str): selector of each row of table
-            columns (dict): column data: selector, datatype and optional extra
+            columns (list): dicts with column data: column name and ata type
             start_row (int, optional): start row index (inclusive). Defaults to 1
             end_row (int, optional): end row index (no inclusive). Defaults to -1
 
@@ -40,27 +41,49 @@ class ScrapingDilutionTracker (WebScraping):
         """
 
         data = []
-
+        selector_rows = "tbody > tr"
         rows_num = len(self.get_elems(selector_rows))
         for index in range(rows_num):
-
+            
             # End loop if end row is reached
             if index + start_row == end_row:
                 break
 
+            # Generate row selector
             selector_row = f'{selector_rows}:nth-child({index + start_row})'
+            
+            # auto detect end row
+            row = self.get_elems(selector_row)
+            if not row:
+                break
 
             data_row = {}
-            for colum_name, column_data in columns.items():
-
-                selector_column = f'{selector_row} {column_data["selector"]}'
+            last_double_column = False
+            double_columns_found = 0
+            for column_data in columns:
+                
+                # Get column name and data type
+                column_name = column_data["name"]
                 data_type_column = column_data["data_type"]
+                
+                # Generate column selector
+                row_index = columns.index(column_data) + 1 - double_columns_found
+                selector_column = f'{selector_row} td:nth-child({row_index})'
+                
+                # Detect colspan=2
+                colspan = self.get_attrib(selector_column, "colspan")
+
+                # Skip if last column was double
+                if last_double_column:
+                    data_row[column_name] = "NULL"
+                    last_double_column = False
+                    continue
 
                 # Extract links
                 extra = column_data.get("extra", {})
                 if extra.get("is_link", False):
                     value = self.get_attrib(selector_column, "href")
-                    data_row[colum_name] = value
+                    data_row[column_name] = value
                     continue
 
                 # Extract texts
@@ -75,7 +98,7 @@ class ScrapingDilutionTracker (WebScraping):
 
                 # Skip empty values
                 if not value:
-                    data_row[colum_name] = "NULL"
+                    data_row[column_name] = "NULL"
                     continue
 
                 # Convert numeric fields
@@ -90,7 +113,12 @@ class ScrapingDilutionTracker (WebScraping):
                     format_date = column_data["extra"]["format"]
                     value = dt.strptime(value, format_date)
 
-                data_row[colum_name] = value
+                data_row[column_name] = value
+                
+                # Skip next column if colspan=2
+                if colspan == "2":
+                    last_double_column = True
+                    double_columns_found += 1
 
             # Add query date to data
             data_row["query_date"] = dt.today()
@@ -169,30 +197,31 @@ class ScrapingDilutionTracker (WebScraping):
         
         # Get table data
         table_data = self.__get_table_data__(
-            selector_rows="tbody > tr",
-            columns={
-                "ticker": {
-                    "selector": 'td:nth-child(1)',
+            columns=[
+                {
+                    "name": "ticker",
                     "data_type": str,
                 },
-                "company_name": {
-                    "selector": 'td:nth-child(2)',
+                {
+                    "name": "company_name",
                     "data_type": str,
                 },
-                "dilution_type": {
-                    "selector": 'td:nth-child(3)',
+                {
+                    "name": "dilution_type",
                     "data_type": str,
                 },
-                "dilution_name": {
-                    "selector": 'td:nth-child(4)',
+                {
+                    "name": "dilution_name",
                     "data_type": str,
                 },
-                "date_modified": {
-                    "selector": 'td:nth-child(5)',
+                {
+                    "name": "date_modified",
                     "data_type": dt,
-                    "extra": {"format": "%Y-%m-%d"}
+                    "extra": {
+                        "format": "%Y-%m-%d"
+                    }
                 }
-            }
+            ]
         )
         return table_data
     
@@ -227,53 +256,143 @@ class ScrapingDilutionTracker (WebScraping):
         
         # Get table data
         table_data = self.__get_table_data__(
-            selector_rows="tbody > tr",
-            columns={
-                "ticker": {
-                    "selector": 'td:nth-child(1)',
+            columns=[
+                {
+                    "name": "ticker",
                     "data_type": str,
                 },
-                "type": {
-                    "selector": 'td:nth-child(2)',
+                {
+                    "name": "type",
                     "data_type": str,
                 },
-                "method": {
-                    "selector": 'td:nth-child(3)',
+                {
+                    "name": "method",
                     "data_type": str,
                 },
-                "share_equivalent": {
-                    "selector": 'td:nth-child(4)',
+                {
+                    "name": "share_equivalent",
                     "data_type": int,
                 },
-                "price": {
-                    "selector": 'td:nth-child(5)',
+                {
+                    "name": "price",
                     "data_type": float,
                 },
-                "warrants": {
-                    "selector": 'td:nth-child(6)',
+                {
+                    "name": "warrants",
                     "data_type": int,
                 },
-                "offering_amt": {
-                    "selector": 'td:nth-child(7)',
+                {
+                    "name": "offering_amt",
                     "data_type": int,
                 },
-                "bank": {
-                    "selector": 'td:nth-child(8)',
+                {
+                    "name": "bank",
                     "data_type": str,
                 },
-                "investors": {
-                    "selector": 'td:nth-child(9)',
+                {
+                    "name": "investors",
                     "data_type": str,
                 },
-                "datetime": {
-                    "selector": 'td:nth-child(10)',
+                {
+                    "name": "datetime",
                     "data_type": dt,
-                    "extra": {"format": "%Y-%m-%d %H:%M"}
+                    "extra": {
+                        "format": "%Y-%m-%d %H:%M",
+                    }
                 }
-            }
+            ]
         )
         return table_data
 
+    def get_pending_s1s(self) -> list:
+        """ Extract data from tablle of new filings page
+
+        Returns:
+            list: dicts with rows data
+            Structure:
+            [
+                {
+                   
+                },
+                ...
+            ]
+        """
+        
+        print("Scraping table Pending S1s")
+        
+        self.set_page(self.pages["pending_s1s"])
+        self.refresh_selenium()
+        
+        # Get table data
+        table_data = self.__get_table_data__(
+            columns=[
+                {
+                    "name": "ticker",
+                    "data_type": str,
+                },
+                {
+                    "name": "company_name",
+                    "data_type": str,
+                },
+                {
+                    "name": "industry",
+                    "data_type": str,
+                },
+                {
+                    "name": "date_first_s1",
+                    "data_type": dt,
+                    "extra": {
+                        "format": "%Y-%m-%d"
+                    }
+                },
+                {
+                    "name": "pricing_date",
+                    "data_type": dt,
+                    "extra": {
+                        "format": "%Y-%m-%d"
+                    }
+                },
+                {
+                    "name": "anticipated_deal_size",
+                    "data_type": str,
+                },
+                {
+                    "name": "estimated_warrant_coverage",
+                    "data_type": int,
+                },
+                {
+                    "name": "underwriters_placement_agents",
+                    "data_type": str,
+                },
+                {
+                    "name": "float_before_offering",
+                    "data_type": int,
+                },
+                {
+                    "name": "status",
+                    "data_type": str,
+                },
+                {
+                    "name": "pricing",
+                    "data_type": float,
+                },
+                {
+                    "name": "shares_offered",
+                    "data_type": int,
+                },
+                {
+                    "name": "final_warrant_coverage",
+                    "data_type": int,
+                },
+                {
+                    "name": "exercise_price",
+                    "data_type": float,
+                },
+            ],
+            start_row=2
+        )
+        return table_data
+    
     def get_noncompliant_data(self, tricker: str) -> list:
         """ Get data from noncompliantcompanylist page
         

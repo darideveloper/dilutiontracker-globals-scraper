@@ -37,9 +37,12 @@ def main():
     # database.save_new_filings(new_filings)
     
     # Get completed offerings
-    completed_offerings = scraper.get_completed_offerings()
-    database.save_completed_offerings(completed_offerings)
-    print("done")
+    # completed_offerings = scraper.get_completed_offerings()
+    # database.save_completed_offerings(completed_offerings)
+    # print("done")
+    
+    pending_s1s = scraper.get_pending_s1s()
+    print(pending_s1s)
 
 
 if __name__ == '__main__':
