@@ -15,7 +15,8 @@ class ScrapingDilutionTracker (WebScraping):
         # Scraping pages
         self.pages = {
             "home": "https://dilutiontracker.com",
-            "new_filings": "https://dilutiontracker.com/app/new?a=t3vcol"
+            "new_filings": "https://dilutiontracker.com/app/new?a=t3vcol",
+            "completed_offering": "https://dilutiontracker.com/app/completed-offerings"
         }
 
         # Start chrome instance with chrome data
@@ -161,7 +162,7 @@ class ScrapingDilutionTracker (WebScraping):
             ]
         """
         
-        print("Scrapeing table New Filings")
+        print("Scraping table New Filings")
         
         self.set_page(self.pages["new_filings"])
         self.refresh_selenium()
@@ -190,6 +191,74 @@ class ScrapingDilutionTracker (WebScraping):
                     "selector": 'td:nth-child(5)',
                     "data_type": dt,
                     "extra": {"format": "%Y-%m-%d"}
+                }
+            }
+        )
+        return table_data
+    
+    def get_completed_offerings(self) -> list:
+        """ Extract data from tablle of completed offering page
+
+        Returns:
+            list: dicts with rows data
+            Structure:
+            [
+                {
+                   
+                },
+                ...
+            ]
+        """
+        
+        print("Scraping table Completed Offering")
+        
+        self.set_page(self.pages["completed_offering"])
+        self.refresh_selenium()
+        
+        # Get table data
+        table_data = self.__get_table_data__(
+            selector_rows="tbody > tr",
+            columns={
+                "ticker": {
+                    "selector": 'td:nth-child(1)',
+                    "data_type": str,
+                },
+                "type": {
+                    "selector": 'td:nth-child(2)',
+                    "data_type": str,
+                },
+                "method": {
+                    "selector": 'td:nth-child(3)',
+                    "data_type": str,
+                },
+                "share_equivalent": {
+                    "selector": 'td:nth-child(4)',
+                    "data_type": int,
+                },
+                "price": {
+                    "selector": 'td:nth-child(5)',
+                    "data_type": float,
+                },
+                "warrants": {
+                    "selector": 'td:nth-child(6)',
+                    "data_type": int,
+                },
+                "offering_amt": {
+                    "selector": 'td:nth-child(7)',
+                    "data_type": int,
+                },
+                "bank": {
+                    "selector": 'td:nth-child(8)',
+                    "data_type": str,
+                },
+                "investors": {
+                    "selector": 'td:nth-child(9)',
+                    "data_type": str,
+                },
+                "datetime": {
+                    "selector": 'td:nth-child(10)',
+                    "data_type": dt,
+                    "extra": {"format": "%Y-%m-%d %H:%M"}
                 }
             }
         )

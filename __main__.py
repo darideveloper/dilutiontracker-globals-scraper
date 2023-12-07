@@ -33,8 +33,13 @@ def main():
         quit()
         
     # Get new filings
-    new_filings = scraper.get_new_filings()
-    database.save_new_filings(new_filings)
+    # new_filings = scraper.get_new_filings()
+    # database.save_new_filings(new_filings)
+    
+    # Get completed offerings
+    completed_offerings = scraper.get_completed_offerings()
+    print(completed_offerings)
+    # database.save_completed_offerings(completed_offerings)
 
 
 if __name__ == '__main__':
