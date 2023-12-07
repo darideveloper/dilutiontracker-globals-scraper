@@ -42,6 +42,7 @@ def main():
     # print("done")
     
     pending_s1s = scraper.get_pending_s1s()
+    database.save_pending_s1s(pending_s1s)
     print(pending_s1s)
 
 

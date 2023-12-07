@@ -69,17 +69,17 @@ class Database (MySQL):
             Structure:
             [
                 {
-                     ticker: str,
-                    type: str,
-                    method: str,
-                    share_equivalent: int,
-                    price: float,
-                    warrants: int,
-                    offering_amt: int,
-                    bank: str,
-                    investors: str,
-                    datetime: datetime,
-                    query_date: datetime,
+                    "ticker": str,
+                    "type": str,
+                    "method": str,
+                    "share_equivalent": int,
+                    "price": float,
+                    "warrants": int,
+                    "offering_amt": int,
+                    "bank": str,
+                    "investors": str,
+                    "datetime": datetime,
+                    "query_date": datetime,
                 },
                 ...
             ]
@@ -110,7 +110,86 @@ class Database (MySQL):
                         {row["offering_amt"]},
                         {self.get_clean_text(row["bank"])},
                         {self.get_clean_text(row["investors"])},
-                        "{row["datetime"].strftime("%Y-%m-%d")}",
+                        "{row["datetime"].strftime("%Y-%m-%d %H:%M")}",
+                        "{row["query_date"].strftime("%Y-%m-%d")}"
+                    )
+            """
+            self.run_sql(sql, auto_commit=False)
+            
+        # Commit changes
+        self.commit_close()
+        
+    def save_pending_s1s(self, pending_s1s_data: list):
+        """ Save in database the pending s1s data
+
+        Args:
+            completed_offerings_data (list): dicts with rows data
+            Structure:
+            [
+                {
+                    "ticker": str,
+                    "company_name": str,
+                    "industry": str,
+                    "date_first_s1": datetime,
+                    "pricing_date": datetime,
+                    "anticipated_deal_size": str,
+                    "estimated_warrant_coverage": int,
+                    "underwriters_placement_agents": str,
+                    "float_before_offering": int,
+                    "status": str,
+                    "pricing": float,
+                    "shares_offered": int,
+                    "final_warrant_coverage": int,
+                    "exercise_price": float,
+                    "query_date": datetime,
+                },
+                ...
+            ]
+        """
+        
+        for row in pending_s1s_data:
+        
+            # Fix fields
+            date_first_s1 = row["date_first_s1"]
+            if date_first_s1 != "NULL":
+                date_first_s1 = f'"{date_first_s1.strftime("%Y-%m-%d")}"'
+            
+            pricing_date = row["pricing_date"]
+            if pricing_date != "NULL":
+                pricing_date = f'"{pricing_date.strftime("%Y-%m-%d")}"'
+            
+            # Generate insert script
+            sql = f"""insert into pending_s1s (
+                        ticker,
+                        company_name,
+                        industry,
+                        date_first_s1,
+                        pricing_date,
+                        anticipated_deal_size,
+                        estimated_warrant_coverage,
+                        underwriters_placement_agents,
+                        float_before_offering,
+                        status,
+                        pricing,
+                        shares_offered,
+                        final_warrant_coverage,
+                        exercise_price,
+                        query_date
+                    ) values (
+                        {self.get_clean_text(row["ticker"])},
+                        {self.get_clean_text(row["company_name"])},
+                        {self.get_clean_text(row["industry"])},
+                        {date_first_s1},
+                        {pricing_date},
+                        {self.get_clean_text(row["anticipated_deal_size"])},
+                        {row["estimated_warrant_coverage"]},
+                        {self.get_clean_text(row["underwriters_placement_agents"])},
+                        {row["float_before_offering"]},
+                        {self.get_clean_text(row["status"])},
+                        {row["pricing"]},
+                        {row["shares_offered"]},
+                        {row["final_warrant_coverage"]},
+                        {row["exercise_price"]},
                         "{row["query_date"].strftime("%Y-%m-%d")}"
                     )
             """

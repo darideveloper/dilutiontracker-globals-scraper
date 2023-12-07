@@ -233,17 +233,17 @@ class ScrapingDilutionTracker (WebScraping):
             Structure:
             [
                 {
-                    ticker: str,
-                    type: str,
-                    method: str,
-                    share_equivalent: int,
-                    price: float,
-                    warrants: int,
-                    offering_amt: int,
-                    bank: str,
-                    investors: str,
-                    datetime: datetime,
-                    query_date: datetime,
+                    "ticker": str,
+                    "type": str,
+                    "method": str,
+                    "share_equivalent": int,
+                    "price": float,
+                    "warrants": int,
+                    "offering_amt": int,
+                    "bank": str,
+                    "investors": str,
+                    "datetime": datetime,
+                    "query_date": datetime,
                 }
                 ...
             ]
@@ -312,7 +312,21 @@ class ScrapingDilutionTracker (WebScraping):
             Structure:
             [
                 {
-                   
+                    "ticker": str,
+                    "company_name": str,
+                    "industry": str,
+                    "date_first_s1": datetime,
+                    "pricing_date": datetime,
+                    "anticipated_deal_size": str,
+                    "estimated_warrant_coverage": int,
+                    "underwriters_placement_agents": str,
+                    "float_before_offering": int,
+                    "status": str,
+                    "pricing": float,
+                    "shares_offered": int,
+                    "final_warrant_coverage": int,
+                    "exercise_price": float,
+                    "query_date": datetime,
                 },
                 ...
             ]
