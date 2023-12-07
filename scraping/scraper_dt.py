@@ -1,6 +1,7 @@
 from time import sleep
 from datetime import datetime as dt
 from scraping.web_scraping import WebScraping
+from logs import logger
 
 
 class ScrapingDilutionTracker (WebScraping):
@@ -191,7 +192,7 @@ class ScrapingDilutionTracker (WebScraping):
             ]
         """
         
-        print("Scraping table New Filings")
+        logger.info("Scraping table New Filings")
         
         self.set_page(self.pages["new_filings"])
         self.refresh_selenium()
@@ -250,7 +251,7 @@ class ScrapingDilutionTracker (WebScraping):
             ]
         """
         
-        print("Scraping table Completed Offering")
+        logger.info("Scraping table Completed Offering")
         
         self.set_page(self.pages["completed_offering"])
         self.refresh_selenium()
@@ -332,7 +333,7 @@ class ScrapingDilutionTracker (WebScraping):
             ]
         """
         
-        print("Scraping table Pending S1s")
+        logger.info("Scraping table Pending S1s")
         
         self.set_page(self.pages["pending_s1s"])
         self.refresh_selenium()
@@ -426,7 +427,7 @@ class ScrapingDilutionTracker (WebScraping):
             ]
         """
         
-        print("Scraping table Reverse Splits")
+        logger.info("Scraping table Reverse Splits")
         
         self.set_page(self.pages["reverse_splits"])
         self.refresh_selenium()
