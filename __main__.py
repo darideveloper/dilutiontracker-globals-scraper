@@ -39,11 +39,14 @@ def main():
     # Get completed offerings
     # completed_offerings = scraper.get_completed_offerings()
     # database.save_completed_offerings(completed_offerings)
-    # print("done")
     
-    pending_s1s = scraper.get_pending_s1s()
-    database.save_pending_s1s(pending_s1s)
-    print(pending_s1s)
+    # Get pending s1s
+    # pending_s1s = scraper.get_pending_s1s()
+    # database.save_pending_s1s(pending_s1s)
+    
+    # Get reverse splits
+    reverse_splits = scraper.get_reverse_splits()
+    # database.save_reverse_splits(reverse_splits)
 
 
 if __name__ == '__main__':

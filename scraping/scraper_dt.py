@@ -17,7 +17,8 @@ class ScrapingDilutionTracker (WebScraping):
             "home": "https://dilutiontracker.com",
             "new_filings": "https://dilutiontracker.com/app/new?a=t3vcol",
             "completed_offering": "https://dilutiontracker.com/app/completed-offerings",
-            "pending_s1s": "https://dilutiontracker.com/app/s1"
+            "pending_s1s": "https://dilutiontracker.com/app/s1",
+            "reverse_splits": "https://dilutiontracker.com/app/reverse-split"
         }
 
         # Start chrome instance with chrome data
@@ -305,8 +306,7 @@ class ScrapingDilutionTracker (WebScraping):
         return table_data
 
     def get_pending_s1s(self) -> list:
-        """ Extract data from tablle of new filings page
-
+        """ Extract data from tablle of pending s1s page
         Returns:
             list: dicts with rows data
             Structure:
@@ -407,6 +407,61 @@ class ScrapingDilutionTracker (WebScraping):
         )
         return table_data
     
+    def get_reverse_splits(self) -> list:
+        """ Extract data from tablle of reverse split page
+
+        Returns:
+            list: dicts with rows data
+            Structure:
+            [
+                {
+                    "symbol": str,
+                    "efective_date": datetime,
+                    "split_ratio": str,
+                    "current_float_m": float,
+                    "status": str,
+                    "query_date": datetime,
+                },
+                ...
+            ]
+        """
+        
+        print("Scraping table Reverse Splits")
+        
+        self.set_page(self.pages["reverse_splits"])
+        self.refresh_selenium()
+        
+        # Get table data
+        table_data = self.__get_table_data__(
+            columns=[
+                {
+                    "name": "symbol",
+                    "data_type": str,
+                },
+                {
+                    "name": "efective_date",
+                    "data_type": dt,
+                    "extra": {
+                        "format": "%Y-%m-%d"
+                    }
+                },
+                {
+                    "name": "split_ratio",
+                    "data_type": str,
+                },
+                {
+                    "name": "current_float_m",
+                    "data_type": float,
+                },
+                {
+                    "name": "status",
+                    "data_type": str,
+                },
+            ],
+            start_row=2
+        )
+        return table_data
+        
     def get_noncompliant_data(self, tricker: str) -> list:
         """ Get data from noncompliantcompanylist page
         
