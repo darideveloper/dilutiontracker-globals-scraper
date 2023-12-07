@@ -38,8 +38,8 @@ def main():
     
     # Get completed offerings
     completed_offerings = scraper.get_completed_offerings()
-    print(completed_offerings)
-    # database.save_completed_offerings(completed_offerings)
+    database.save_completed_offerings(completed_offerings)
+    print("done")
 
 
 if __name__ == '__main__':

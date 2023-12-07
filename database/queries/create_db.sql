@@ -15,6 +15,7 @@ CREATE TABLE `completed_offerings` (
   `method` varchar(5),
   `share_equivalent` bigint,
   `price` float,
+  `warrants` bigint,
   `offering_amt` bigint,
   `bank` varchar(50),
   `investors` varchar(50),

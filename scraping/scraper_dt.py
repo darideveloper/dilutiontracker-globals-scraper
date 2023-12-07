@@ -204,8 +204,18 @@ class ScrapingDilutionTracker (WebScraping):
             Structure:
             [
                 {
-                   
-                },
+                    ticker: str,
+                    type: str,
+                    method: str,
+                    share_equivalent: int,
+                    price: float,
+                    warrants: int,
+                    offering_amt: int,
+                    bank: str,
+                    investors: str,
+                    datetime: datetime,
+                    query_date: datetime,
+                }
                 ...
             ]
         """

@@ -61,6 +61,64 @@ class Database (MySQL):
         # Commit changes
         self.commit_close()
     
+    def save_completed_offerings(self, completed_offerings_data: list):
+        """ Save in database the new completed offerings data
+
+        Args:
+            completed_offerings_data (list): dicts with rows data
+            Structure:
+            [
+                {
+                     ticker: str,
+                    type: str,
+                    method: str,
+                    share_equivalent: int,
+                    price: float,
+                    warrants: int,
+                    offering_amt: int,
+                    bank: str,
+                    investors: str,
+                    datetime: datetime,
+                    query_date: datetime,
+                },
+                ...
+            ]
+        """
+        
+        for row in completed_offerings_data:
+            
+            # Generate insert script
+            sql = f"""insert into completed_offerings (
+                        ticker,
+                        type,
+                        method,
+                        share_equivalent,
+                        price,
+                        warrants,
+                        offering_amt,
+                        bank,
+                        investors,
+                        datetime,
+                        query_date
+                    ) values (
+                        {self.get_clean_text(row["ticker"])},
+                        {self.get_clean_text(row["type"])},
+                        {self.get_clean_text(row["method"])},
+                        {row["share_equivalent"]},
+                        {row["price"]},
+                        {row["warrants"]},
+                        {row["offering_amt"]},
+                        {self.get_clean_text(row["bank"])},
+                        {self.get_clean_text(row["investors"])},
+                        "{row["datetime"].strftime("%Y-%m-%d")}",
+                        "{row["query_date"].strftime("%Y-%m-%d")}"
+                    )
+            """
+            self.run_sql(sql, auto_commit=False)
+            
+        # Commit changes
+        self.commit_close()
+    
     def save_noncompliant_data(self, noncompliant_data: list):
         """ Save in database the no compliant data
 
