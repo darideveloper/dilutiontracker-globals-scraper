@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from logs import logger
 from scraping.scraper_dt import ScrapingDilutionTracker
-# from database.db import Database
+from database.db import Database
 load_dotenv()
 
 DEBUG = os.getenv("DEBUG") == "True"
@@ -12,7 +12,7 @@ CHROME_FOLDER = os.getenv('CHROME_FOLDER')
 def main():
 
     # Connect to database
-    # database = Database()
+    database = Database()
 
     # Validate chrome folder
     if CHROME_FOLDER is None or not os.path.isdir(CHROME_FOLDER):
@@ -34,7 +34,7 @@ def main():
         
     # Get new filings
     new_filings = scraper.get_new_filings()
-    print(new_filings)
+    database.save_new_filings(new_filings)
 
 
 if __name__ == '__main__':

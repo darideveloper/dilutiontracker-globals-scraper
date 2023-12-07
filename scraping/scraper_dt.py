@@ -193,7 +193,7 @@ class ScrapingDilutionTracker (WebScraping):
                 }
             }
         )
-        print(table_data)
+        return table_data
 
     def get_noncompliant_data(self, tricker: str) -> list:
         """ Get data from noncompliantcompanylist page

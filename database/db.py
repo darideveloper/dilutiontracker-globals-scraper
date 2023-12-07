@@ -17,7 +17,50 @@ class Database (MySQL):
         super().__init__(DB_HOST, DB_NAME, DB_USER, DB_PASS)
 
         self.premarket_id = None
+    
+    def save_new_filings(self, new_filings_data: list):
+        """ Save in database the new filings data
+
+        Args:
+            new_filings_data (list): dicts with rows data
+            Structure:
+            [
+                {
+                    "ticker": str,
+                    "company_name": str,
+                    "dilution_type": str,
+                    "dilution_name": str,
+                    "date_modified": datetime,
+                    "query_date": datetime,
+                },
+                ...
+            ]
+        """
         
+        for row in new_filings_data:
+            
+            # Generate insert script
+            sql = f""" insert into new_filings (
+                        ticker,
+                        company_name,
+                        dilution_type,
+                        dilution_name,
+                        date_modified,
+                        query_date
+                    ) values (
+                        {self.get_clean_text(row["ticker"])},
+                        {self.get_clean_text(row["company_name"])},
+                        {self.get_clean_text(row["dilution_type"])},
+                        {self.get_clean_text(row["dilution_name"])},
+                        "{row["date_modified"].strftime("%Y-%m-%d")}",
+                        "{row["query_date"].strftime("%Y-%m-%d")}"
+                    )
+            """
+            self.run_sql(sql, auto_commit=False)
+            
+        # Commit changes
+        self.commit_close()
+    
     def save_noncompliant_data(self, noncompliant_data: list):
         """ Save in database the no compliant data
 
