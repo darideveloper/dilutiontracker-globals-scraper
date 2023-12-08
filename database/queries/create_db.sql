@@ -54,6 +54,7 @@ CREATE TABLE `reverse_splits` (
 
 CREATE TABLE `noncompliant` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
+  `ticker` varchar(20),
   `company` varchar(200),
   `deficiency` varchar(50),
   `market` varchar(5),

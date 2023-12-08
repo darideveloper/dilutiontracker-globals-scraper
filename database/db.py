@@ -255,50 +255,38 @@ class Database (MySQL):
             Structure:
             [
                  {
+                    "ticker": str,
                     "company": str,
                     "deficiency": str,
                     "market": str,
                     "notification_date": datetime,
+                    "query_date": datetime,
                 },
                 ...
             ]
         """
-        
-        tables = {
-            "company": "noncompliant_companies",
-            "deficiency": "noncompliant_deficiencies",
-            "market": "noncompliant_markets",
-        }
-        
-        if noncompliant_data:
-            
-            dict_tables_data = {}
-            for noncompliant_row in noncompliant_data:
 
-                self.__get_dict_tables_data__(
-                    tables,
-                    noncompliant_row,
-                    dict_tables_data
+        for row in noncompliant_data:
+
+            # Save row data
+            sql = f"""
+                INSERT INTO noncompliant (
+                    ticker,
+                    company,
+                    deficiency,
+                    market,
+                    notification_date,
+                    query_date
+                ) VALUES (
+                    {self.get_clean_text(row["ticker"])},
+                    {self.get_clean_text(row["company"])},
+                    {self.get_clean_text(row["deficiency"])},
+                    {self.get_clean_text(row["market"])},
+                    "{row["notification_date"].strftime("%Y-%m-%d")}",
+                    "{row["query_date"].strftime("%Y-%m-%d")}"
                 )
+            """
+            self.run_sql(sql, auto_commit=False)
 
-                # Save row data
-                sql = f"""
-                    INSERT INTO noncompliant (
-                        company_id,
-                        deficiency_id,
-                        market_id,
-                        notification_date,
-                        premarket_id
-                    ) values (
-                        {dict_tables_data["company"][noncompliant_row["company"]]},
-                        {dict_tables_data["deficiency"][noncompliant_row["deficiency"]]},
-                        {dict_tables_data["market"][noncompliant_row["market"]]},
-                        "{noncompliant_row["notification_date"].strftime("%Y-%m-%d")}",
-                        {self.premarket_id}
-                    )
-                                        
-                """
-                self.run_sql(sql, auto_commit=False)
-
-            # Commit changes
-            self.commit_close()
+        # Commit changes
+        self.commit_close()

@@ -506,8 +506,7 @@ class ScrapingDilutionTracker (WebScraping):
         rows_num = len(self.get_elems(selectors["rows"]))
         current_company = ""
         data = []
-        # for index in range(rows_num):  DEBUG
-        for index in range(50):
+        for index in range(rows_num):
             
             selector_row = f'{selectors["rows"]}:nth-child({index + 1})'
             selector_company = f'{selector_row} {selectors["company"]}'
@@ -541,6 +540,7 @@ class ScrapingDilutionTracker (WebScraping):
                 "deficiency": deficiency,
                 "market": market,
                 "notification_date": notification_date,
+                "query_date": dt.today(),
             })
 
         return data
