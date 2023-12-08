@@ -123,7 +123,7 @@ class Database (MySQL):
         """ Save in database the pending s1s data
 
         Args:
-            completed_offerings_data (list): dicts with rows data
+            pending_s1s_data (list): dicts with rows data
             Structure:
             [
                 {
@@ -190,6 +190,54 @@ class Database (MySQL):
                         {row["shares_offered"]},
                         {row["final_warrant_coverage"]},
                         {row["exercise_price"]},
+                        "{row["query_date"].strftime("%Y-%m-%d")}"
+                    )
+            """
+            self.run_sql(sql, auto_commit=False)
+            
+        # Commit changes
+        self.commit_close()
+        
+    def save_reverse_splits(self, reverse_splits_data: list):
+        """ Save in database the reverse splits data
+
+        Args:
+            reverse_splits_data (list): dicts with rows data
+            Structure:
+            [
+                {
+                    "symbol": str,
+                    "effective_date": datetime,
+                    "split_ratio": str,
+                    "current_float_m": float,
+                    "status": str,
+                    "query_date": datetime,
+                },
+                ...
+            ]
+        """
+        
+        for row in reverse_splits_data:
+        
+            # Fix fields
+            effective_date = row["effective_date"]
+            if effective_date != "NULL":
+                effective_date = f'"{effective_date.strftime("%Y-%m-%d")}"'
+            
+            # Generate insert script
+            sql = f"""insert into reverse_splits (
+                        symbol,
+                        effective_date,
+                        split_ratio,
+                        current_float_m,
+                        status,
+                        query_date
+                    ) values (
+                        {self.get_clean_text(row["symbol"])},
+                        {effective_date},
+                        {self.get_clean_text(row["split_ratio"])},
+                        {row["current_float_m"]},
+                        {self.get_clean_text(row["status"])},
                         "{row["query_date"].strftime("%Y-%m-%d")}"
                     )
             """

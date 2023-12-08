@@ -45,8 +45,12 @@ def main():
     # database.save_pending_s1s(pending_s1s)
     
     # Get reverse splits
-    reverse_splits = scraper.get_reverse_splits()
+    # reverse_splits = scraper.get_reverse_splits()
     # database.save_reverse_splits(reverse_splits)
+    
+    # Get noncompliant data
+    noncompliant_data = scraper.get_noncompliant_data()
+    database.save_noncompliant_data(noncompliant_data)
 
 
 if __name__ == '__main__':

@@ -19,7 +19,8 @@ class ScrapingDilutionTracker (WebScraping):
             "new_filings": "https://dilutiontracker.com/app/new?a=t3vcol",
             "completed_offering": "https://dilutiontracker.com/app/completed-offerings",
             "pending_s1s": "https://dilutiontracker.com/app/s1",
-            "reverse_splits": "https://dilutiontracker.com/app/reverse-split"
+            "reverse_splits": "https://dilutiontracker.com/app/reverse-split",
+            "noncompliant": "https://listingcenter.nasdaq.com/noncompliantcompanylist.aspx",
         }
 
         # Start chrome instance with chrome data
@@ -192,7 +193,7 @@ class ScrapingDilutionTracker (WebScraping):
             ]
         """
         
-        logger.info("Scraping table New Filings")
+        logger.info("Scraping table New Filings...")
         
         self.set_page(self.pages["new_filings"])
         self.refresh_selenium()
@@ -251,7 +252,7 @@ class ScrapingDilutionTracker (WebScraping):
             ]
         """
         
-        logger.info("Scraping table Completed Offering")
+        logger.info("Scraping table Completed Offering...")
         
         self.set_page(self.pages["completed_offering"])
         self.refresh_selenium()
@@ -333,7 +334,7 @@ class ScrapingDilutionTracker (WebScraping):
             ]
         """
         
-        logger.info("Scraping table Pending S1s")
+        logger.info("Scraping table Pending S1s...")
         
         self.set_page(self.pages["pending_s1s"])
         self.refresh_selenium()
@@ -417,7 +418,7 @@ class ScrapingDilutionTracker (WebScraping):
             [
                 {
                     "symbol": str,
-                    "efective_date": datetime,
+                    "effective_date": datetime,
                     "split_ratio": str,
                     "current_float_m": float,
                     "status": str,
@@ -427,7 +428,7 @@ class ScrapingDilutionTracker (WebScraping):
             ]
         """
         
-        logger.info("Scraping table Reverse Splits")
+        logger.info("Scraping table Reverse Splits...")
         
         self.set_page(self.pages["reverse_splits"])
         self.refresh_selenium()
@@ -440,7 +441,7 @@ class ScrapingDilutionTracker (WebScraping):
                     "data_type": str,
                 },
                 {
-                    "name": "efective_date",
+                    "name": "effective_date",
                     "data_type": dt,
                     "extra": {
                         "format": "%Y-%m-%d"
@@ -459,15 +460,12 @@ class ScrapingDilutionTracker (WebScraping):
                     "data_type": str,
                 },
             ],
-            start_row=2
+            start_row=2,
         )
         return table_data
         
-    def get_noncompliant_data(self, tricker: str) -> list:
+    def get_noncompliant_data(self) -> list:
         """ Get data from noncompliantcompanylist page
-        
-        Args:
-            tricker (str): company tricker (identifier)
 
         Returns:
             list: no complaint data
@@ -475,28 +473,31 @@ class ScrapingDilutionTracker (WebScraping):
             Structure:
             [
                 {
+                    "ticker": str,
                     "company": str,
                     "deficiency": str,
                     "market": str,
                     "notification_date": datetime,
+                    "query_date": datetime,
                 },
                 ...
             ]
         """
+        
+        logger.info("Scraping table Noncompliant Data...")
 
         selectors = {
             "dispay_btn": 'th [type="button"]',
             "rows": '.rgMasterTable tbody tr',
             "company": 'td[colspan="4"] p',
-            "tricker": 'td:nth-child(2)',
+            "ticker": 'td:nth-child(2)',
             "deficiency": 'td:nth-child(3)',
             "market": 'td:nth-child(4)',
             "notification_date": 'td:nth-child(5)',
         }
 
         # Load page and open registers
-        self.set_page(
-            "https://listingcenter.nasdaq.com/noncompliantcompanylist.aspx")
+        self.set_page(self.pages["noncompliant"])
         self.click_js(selectors["dispay_btn"])
         sleep(5)
         self.refresh_selenium()
@@ -505,8 +506,9 @@ class ScrapingDilutionTracker (WebScraping):
         rows_num = len(self.get_elems(selectors["rows"]))
         current_company = ""
         data = []
-        for index in range(rows_num):
-
+        # for index in range(rows_num):  DEBUG
+        for index in range(50):
+            
             selector_row = f'{selectors["rows"]}:nth-child({index + 1})'
             selector_company = f'{selector_row} {selectors["company"]}'
 
@@ -517,10 +519,8 @@ class ScrapingDilutionTracker (WebScraping):
                 continue
 
             # Validate company tricker
-            selector_tricker = f'{selector_row} {selectors["tricker"]}'
-            current_tricker = self.get_text(selector_tricker).lower().strip()
-            if tricker not in current_tricker:
-                continue
+            selector_ticker = f'{selector_row} {selectors["ticker"]}'
+            ticker = self.get_text(selector_ticker).lower().strip()
             
             # Extract row data
             selector_deficiency = f'{selector_row} {selectors["deficiency"]}'
@@ -536,6 +536,7 @@ class ScrapingDilutionTracker (WebScraping):
 
             # Save data
             data.append({
+                "ticker": ticker,
                 "company": current_company,
                 "deficiency": deficiency,
                 "market": market,
