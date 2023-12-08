@@ -90,20 +90,22 @@ class ScrapingDilutionTracker (WebScraping):
                     data_row[column_name] = value
                     continue
 
-                # Extract texts
-                replace_chats = [
-                    "\\",
-                    "'",
-                    '"'
-                ]
+                # Extract text
                 value = self.get_text(selector_column)
-                for chat in replace_chats:
-                    value = value.replace(chat, "")
 
                 # Skip empty values
                 if not value:
                     data_row[column_name] = "NULL"
                     continue
+               
+                # Clean text
+                replace_chars = [
+                    "\\",
+                    "'",
+                    '"'
+                ]
+                for char in replace_chars:
+                    value = value.replace(char, "")
 
                 # Convert numeric fields
                 if data_type_column in [int, float]:
