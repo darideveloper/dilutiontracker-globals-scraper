@@ -33,20 +33,20 @@ def main():
         quit()
         
     # Get new filings
-    # new_filings = scraper.get_new_filings()
-    # database.save_new_filings(new_filings)
+    new_filings = scraper.get_new_filings()
+    database.save_new_filings(new_filings)
     
     # Get completed offerings
-    # completed_offerings = scraper.get_completed_offerings()
-    # database.save_completed_offerings(completed_offerings)
+    completed_offerings = scraper.get_completed_offerings()
+    database.save_completed_offerings(completed_offerings)
     
     # Get pending s1s
-    # pending_s1s = scraper.get_pending_s1s()
-    # database.save_pending_s1s(pending_s1s)
+    pending_s1s = scraper.get_pending_s1s()
+    database.save_pending_s1s(pending_s1s)
     
     # Get reverse splits
-    # reverse_splits = scraper.get_reverse_splits()
-    # database.save_reverse_splits(reverse_splits)
+    reverse_splits = scraper.get_reverse_splits()
+    database.save_reverse_splits(reverse_splits)
     
     # Get noncompliant data
     noncompliant_data = scraper.get_noncompliant_data()

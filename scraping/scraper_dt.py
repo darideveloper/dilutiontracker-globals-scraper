@@ -20,7 +20,8 @@ class ScrapingDilutionTracker (WebScraping):
             "completed_offering": "https://dilutiontracker.com/app/completed-offerings",
             "pending_s1s": "https://dilutiontracker.com/app/s1",
             "reverse_splits": "https://dilutiontracker.com/app/reverse-split",
-            "noncompliant": "https://listingcenter.nasdaq.com/noncompliantcompanylist.aspx",
+            "noncompliant": "https://listingcenter.nasdaq.com/"
+                            "noncompliantcompanylist.aspx",
         }
 
         # Start chrome instance with chrome data
